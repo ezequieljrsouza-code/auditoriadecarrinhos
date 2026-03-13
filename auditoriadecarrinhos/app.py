@@ -1,22 +1,16 @@
 import re
-from collections import OrderedDict
-
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Auditoria de Carrinhos", page_icon="🛒", layout="wide")
 
 ORANGE = "#f59e0b"
-DARK = "#1f2937"
-BORDER = "#d1d5db"
 BG = "#f8fafc"
-
 
 # ---------------- CSS ----------------
 def inject_css():
     st.markdown(f"""
     <style>
-
     .stApp {{ background:{BG}; }}
 
     .hero {{
@@ -60,7 +54,6 @@ def inject_css():
         font-weight:700;
         background:#fde68a;
     }}
-
     </style>
     """, unsafe_allow_html=True)
 
@@ -116,7 +109,7 @@ def main():
     st.markdown("""
     <div class='hero'>
     <h1>Auditoria de Carrinhos</h1>
-    Dashboard HH baseado na base de auditoria de carrinhos
+    Dashboard HH baseado na base de auditoria
     </div>
     """, unsafe_allow_html=True)
 
@@ -125,79 +118,82 @@ def main():
     if not file:
         st.stop()
 
-    # ---------------- LER ARQUIVO ----------------
+    # ---------------- LER BASE ----------------
     if file.name.endswith("csv"):
         df = pd.read_csv(file)
     else:
         df = pd.read_excel(file)
 
-    # ---------------- VALIDAR COLUNAS ----------------
     if len(df.columns) < 5:
-        st.error("A planilha precisa ter pelo menos 5 colunas (A até E).")
+        st.error("A planilha precisa ter pelo menos 5 colunas.")
         st.stop()
 
-    coluna_contagem = df.columns[0]   # Coluna A
-    coluna_hora = df.columns[1]       # Coluna B
-    coluna_nome = df.columns[4]       # Coluna E
+    coluna_contagem = df.columns[0]
+    coluna_hora = df.columns[1]
+    coluna_nome = df.columns[4]
 
-    # ---------------- EXTRAIR HORA ----------------
+    # ---------------- HORA ----------------
     df["Hora"] = df[coluna_hora].apply(parse_hour)
 
-    if df["Hora"].dropna().empty:
-        st.error("Não foi possível identificar horas válidas na coluna B.")
-        st.stop()
+    df = df.dropna(subset=["Hora"])
 
-    # ---------------- MÉTRICA TOTAL ----------------
-    total = df[coluna_contagem].count()
+    # ---------------- TOTAL ----------------
+    total = len(df)
 
-    c1 = st.columns(1)[0]
-    c1.metric("Total de Carrinhos Auditados", total)
+    st.metric("Total de Carrinhos Auditados", total)
 
-    # ---------------- HH TOTAL ----------------
-    base_hour = int(df["Hora"].dropna().min())
+    # ---------------- HH ----------------
+    horas = sorted(df["Hora"].unique())
 
-    hours = list(range(base_hour, base_hour + 8))
+    hh_data = []
 
     row = {"Carrinhos"}
 
-    for h in hours:
-        row[f"{h}h"] = (df["Hora"] == h).sum()
+    for h in horas:
+        qtd = (df["Hora"] == h).sum()
+        row[f"{h}h"] = qtd
 
     row["TOTAL"] = total
 
-    hh_df = pd.DataFrame([row])
+    hh_data.append(row)
 
-    st.markdown("<div class='section-title'>HH Auditoria de Carrinhos</div>", unsafe_allow_html=True)
+    hh_df = pd.DataFrame(hh_data)
+
+    st.markdown("<div class='section-title'>HH Auditoria</div>", unsafe_allow_html=True)
 
     render_table(hh_df)
 
-    # ---------------- HH POR OPERADOR ----------------
-    operadores = df[coluna_nome].dropna().unique()
+    # ---------------- TOP 10 AUDITORES ----------------
+    ranking = (
+        df.groupby(coluna_nome)
+        .size()
+        .reset_index(name="Carrinhos")
+        .sort_values("Carrinhos", ascending=False)
+        .head(10)
+    )
 
-    rows = []
+    st.markdown("<div class='section-title'>🏆 Top 10 Auditores</div>", unsafe_allow_html=True)
 
-    for op in operadores:
+    st.dataframe(ranking, use_container_width=True)
 
-        sub = df[df[coluna_nome] == op]
+    # ---------------- PRODUTIVIDADE ----------------
+    prod = (
+        df.groupby([coluna_nome, "Hora"])
+        .size()
+        .reset_index(name="Carrinhos")
+    )
 
-        r = OrderedDict()
+    produtividade = (
+        prod.groupby(coluna_nome)["Carrinhos"]
+        .mean()
+        .reset_index()
+        .rename(columns={"Carrinhos": "Carrinhos/Hora"})
+        .sort_values("Carrinhos/Hora", ascending=False)
+    )
 
-        r["Operador"] = op
+    st.markdown("<div class='section-title'>⚡ Produtividade (Carrinhos/Hora)</div>", unsafe_allow_html=True)
 
-        for h in hours:
-            r[f"{h}h"] = (sub["Hora"] == h).sum()
-
-        r["TOTAL"] = len(sub)
-
-        rows.append(r)
-
-    op_df = pd.DataFrame(rows)
-
-    op_df = op_df.sort_values("TOTAL", ascending=False)
-
-    st.markdown("<div class='section-title'>Quem Bipou Mais Carrinhos</div>", unsafe_allow_html=True)
-
-    render_table(op_df)
+    st.dataframe(produtividade, use_container_width=True)
 
     # ---------------- DOWNLOAD ----------------
     st.download_button(
