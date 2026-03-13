@@ -27,32 +27,7 @@ def inject_css():
         padding:10px;
         border-radius:10px 10px 0 0;
         font-weight:700;
-        margin-top:20px;
-    }}
-
-    table.hh-table {{
-        width:100%;
-        border-collapse:collapse;
-    }}
-
-    table.hh-table th {{
-        background:{ORANGE};
-        color:white;
-        border:2px solid black;
-        padding:6px;
-    }}
-
-    table.hh-table td {{
-        border:2px solid black;
-        padding:6px;
-        text-align:center;
-        background:#e5e7eb;
-    }}
-
-    table.hh-table td:first-child {{
-        text-align:left;
-        font-weight:700;
-        background:#fde68a;
+        margin-top:25px;
     }}
     </style>
     """, unsafe_allow_html=True)
@@ -75,30 +50,6 @@ def parse_hour(valor):
         return pd.to_datetime(texto).hour
     except:
         return None
-
-
-# ---------------- RENDER TABELA ----------------
-def render_table(df):
-
-    html = "<table class='hh-table'>"
-
-    html += "<tr>"
-    for c in df.columns:
-        html += f"<th>{c}</th>"
-    html += "</tr>"
-
-    for _, r in df.iterrows():
-
-        html += "<tr>"
-
-        for v in r:
-            html += f"<td>{v}</td>"
-
-        html += "</tr>"
-
-    html += "</table>"
-
-    st.markdown(html, unsafe_allow_html=True)
 
 
 # ---------------- MAIN ----------------
@@ -124,8 +75,9 @@ def main():
     else:
         df = pd.read_excel(file)
 
+    # ---------------- VALIDAR COLUNAS ----------------
     if len(df.columns) < 5:
-        st.error("A planilha precisa ter pelo menos 5 colunas.")
+        st.error("A planilha precisa ter pelo menos 5 colunas (A até E).")
         st.stop()
 
     coluna_contagem = df.columns[0]
@@ -143,25 +95,11 @@ def main():
     st.metric("Total de Carrinhos Auditados", total)
 
     # ---------------- HH ----------------
-    horas = sorted(df["Hora"].unique())
-
-    hh_data = []
-
-    row = {"Carrinhos"}
-
-    for h in horas:
-        qtd = (df["Hora"] == h).sum()
-        row[f"{h}h"] = qtd
-
-    row["TOTAL"] = total
-
-    hh_data.append(row)
-
-    hh_df = pd.DataFrame(hh_data)
+    hh = df.groupby("Hora").size().reset_index(name="Carrinhos")
 
     st.markdown("<div class='section-title'>HH Auditoria</div>", unsafe_allow_html=True)
 
-    render_table(hh_df)
+    st.dataframe(hh, use_container_width=True)
 
     # ---------------- TOP 10 AUDITORES ----------------
     ranking = (
