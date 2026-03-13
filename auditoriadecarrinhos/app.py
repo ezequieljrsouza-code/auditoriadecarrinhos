@@ -1,19 +1,15 @@
-import io
 import re
 from collections import OrderedDict
 
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="HH Inventário", page_icon="📦", layout="wide")
+st.set_page_config(page_title="Auditoria de Carrinhos", page_icon="🛒", layout="wide")
 
 ORANGE = "#f59e0b"
 DARK = "#1f2937"
 BORDER = "#d1d5db"
 BG = "#f8fafc"
-WHITE = "#ffffff"
-
-STATUS_ORDER = ["Verificados", "Pendente", "Deslocado"]
 
 
 # ---------------- CSS ----------------
@@ -31,21 +27,13 @@ def inject_css():
         margin-bottom:20px;
     }}
 
-    .metric-card {{
-        background:white;
-        border:1px solid {BORDER};
-        border-radius:12px;
-        padding:15px;
-        text-align:center;
-    }}
-
     .section-title {{
         background:{ORANGE};
         color:white;
         padding:10px;
         border-radius:10px 10px 0 0;
         font-weight:700;
-        margin-top:15px;
+        margin-top:20px;
     }}
 
     table.hh-table {{
@@ -77,30 +65,6 @@ def inject_css():
     """, unsafe_allow_html=True)
 
 
-# ---------------- NORMALIZAR COLUNAS ----------------
-def normalize_columns(df):
-
-    rename = {}
-
-    for c in df.columns:
-
-        low = c.lower()
-
-        if "data" in low:
-            rename[c] = "Data de Escaneamento"
-
-        if "situa" in low:
-            rename[c] = "Situação"
-
-        if "operador" in low:
-            rename[c] = "Operador"
-
-        if "area" in low or "área" in low:
-            rename[c] = "Área"
-
-    return df.rename(columns=rename)
-
-
 # ---------------- EXTRAIR HORA ----------------
 def parse_hour(valor):
 
@@ -120,7 +84,7 @@ def parse_hour(valor):
         return None
 
 
-# ---------------- RENDER TABLE ----------------
+# ---------------- RENDER TABELA ----------------
 def render_table(df):
 
     html = "<table class='hh-table'>"
@@ -151,93 +115,74 @@ def main():
 
     st.markdown("""
     <div class='hero'>
-    <h1>HH Inventário</h1>
-    Dashboard automático baseado na BASE INICIAL INVENTÁRIO
+    <h1>Auditoria de Carrinhos</h1>
+    Dashboard HH baseado na base de auditoria de carrinhos
     </div>
     """, unsafe_allow_html=True)
 
-    file = st.file_uploader("Upload BASE INICIAL INVENTÁRIO", type=["xlsx","csv"])
+    file = st.file_uploader("Upload da base de auditoria", type=["xlsx","csv"])
 
     if not file:
         st.stop()
 
+    # ---------------- LER ARQUIVO ----------------
     if file.name.endswith("csv"):
         df = pd.read_csv(file)
     else:
         df = pd.read_excel(file)
 
-    df = normalize_columns(df)
-
-    if "Data de Escaneamento" not in df.columns:
-        st.error("Coluna Data de Escaneamento não encontrada.")
+    # ---------------- VALIDAR COLUNAS ----------------
+    if len(df.columns) < 5:
+        st.error("A planilha precisa ter pelo menos 5 colunas (A até E).")
         st.stop()
 
-    df["Hora"] = df["Data de Escaneamento"].apply(parse_hour)
+    coluna_contagem = df.columns[0]   # Coluna A
+    coluna_hora = df.columns[1]       # Coluna B
+    coluna_nome = df.columns[4]       # Coluna E
+
+    # ---------------- EXTRAIR HORA ----------------
+    df["Hora"] = df[coluna_hora].apply(parse_hour)
 
     if df["Hora"].dropna().empty:
-        st.error("Não foi possível identificar horas válidas.")
+        st.error("Não foi possível identificar horas válidas na coluna B.")
         st.stop()
 
-    # ---------------- MÉTRICAS ----------------
-    total = len(df)
-    ver = (df["Situação"] == "Verificados").sum()
-    pen = (df["Situação"] == "Pendente").sum()
-    des = (df["Situação"] == "Deslocado").sum()
+    # ---------------- MÉTRICA TOTAL ----------------
+    total = df[coluna_contagem].count()
 
-    c1,c2,c3,c4 = st.columns(4)
+    c1 = st.columns(1)[0]
+    c1.metric("Total de Carrinhos Auditados", total)
 
-    c1.metric("Base", total)
-    c2.metric("Verificados", ver)
-    c3.metric("Pendentes", pen)
-    c4.metric("Deslocados", des)
-
-
-    # ---------------- ZONAS ----------------
-    if "Área" in df.columns:
-
-        st.markdown("<div class='section-title'>Pendentes Zona</div>", unsafe_allow_html=True)
-
-        zonas = [
-        "Returns","Sorting","Problem Solving","Missort",
-        "Fraude","Damaged","Buffered","Dispatch",
-        "Containerized","Bulky returns"
-        ]
-
-        counts = df[df["Situação"]=="Pendente"]["Área"].value_counts().to_dict()
-
-        cols = st.columns(5)
-
-        for i,z in enumerate(zonas):
-
-            val = counts.get(z,0)
-
-            cols[i%5].markdown(f"""
-            <div style="
-            background:white;
-            border-left:6px solid {ORANGE};
-            padding:15px;
-            border-radius:10px;
-            text-align:center;
-            box-shadow:0px 2px 6px rgba(0,0,0,0.08)
-            ">
-            <div style="font-size:13px;color:#64748b">{z}</div>
-            <div style="font-size:28px;font-weight:bold;color:{DARK}">{val}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-
-    # ---------------- HH ----------------
+    # ---------------- HH TOTAL ----------------
     base_hour = int(df["Hora"].dropna().min())
 
     hours = list(range(base_hour, base_hour + 8))
 
+    row = {"Carrinhos"}
+
+    for h in hours:
+        row[f"{h}h"] = (df["Hora"] == h).sum()
+
+    row["TOTAL"] = total
+
+    hh_df = pd.DataFrame([row])
+
+    st.markdown("<div class='section-title'>HH Auditoria de Carrinhos</div>", unsafe_allow_html=True)
+
+    render_table(hh_df)
+
+    # ---------------- HH POR OPERADOR ----------------
+    operadores = df[coluna_nome].dropna().unique()
+
     rows = []
 
-    for s in STATUS_ORDER:
+    for op in operadores:
 
-        sub = df[df["Situação"] == s]
+        sub = df[df[coluna_nome] == op]
 
-        r = {"QTD / Status": s}
+        r = OrderedDict()
+
+        r["Operador"] = op
 
         for h in hours:
             r[f"{h}h"] = (sub["Hora"] == h).sum()
@@ -246,47 +191,19 @@ def main():
 
         rows.append(r)
 
-    status_df = pd.DataFrame(rows)
+    op_df = pd.DataFrame(rows)
 
-    st.markdown("<div class='section-title'>HH Inventário</div>", unsafe_allow_html=True)
+    op_df = op_df.sort_values("TOTAL", ascending=False)
 
-    render_table(status_df)
+    st.markdown("<div class='section-title'>Quem Bipou Mais Carrinhos</div>", unsafe_allow_html=True)
 
+    render_table(op_df)
 
-    # ---------------- OPERADORES ----------------
-    if "Operador" in df.columns:
-
-        ops = df["Operador"].dropna().unique()
-
-        rows = []
-
-        for op in ops:
-
-            sub = df[df["Operador"] == op]
-
-            r = OrderedDict()
-
-            r["Operador"] = op
-
-            for h in hours:
-                r[f"{h}h"] = (sub["Hora"] == h).sum()
-
-            r["TOTAL"] = len(sub)
-
-            rows.append(r)
-
-        op_df = pd.DataFrame(rows)
-
-        st.markdown("<div class='section-title'>HH por Operador</div>", unsafe_allow_html=True)
-
-        render_table(op_df)
-
-
-    # ---------------- DOWNLOAD BASE ----------------
+    # ---------------- DOWNLOAD ----------------
     st.download_button(
         "Baixar base tratada",
         data=df.to_csv(index=False).encode("utf-8"),
-        file_name="base_tratada.csv"
+        file_name="auditoria_carrinhos_tratada.csv"
     )
 
 
