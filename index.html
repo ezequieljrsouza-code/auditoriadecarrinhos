@@ -145,14 +145,15 @@
     .filter-reset:hover { background: var(--red); color: #fff; }
 
     /* ═══ KPI GRID ══════════════════════════════ */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: 210px 320px 210px;
-      grid-template-rows: 1fr;
-      gap: 12px; margin-bottom: 14px;
-      justify-content: center;
-      align-items: stretch;
-    }
+/* --- Ajuste no Grid para evitar sobreposição --- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Melhora a distribuição */
+  gap: 15px; 
+  margin-bottom: 14px;
+  justify-content: center;
+  align-items: stretch;
+}
     /* Side columns: 2 equal rows so top/bottom cards align across both sides */
     .kpi-left, .kpi-right {
       display: grid;
