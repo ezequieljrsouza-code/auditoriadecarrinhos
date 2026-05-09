@@ -535,16 +535,21 @@
       </div>
     </div>
 
+  <div style="text-align:center;padding:10px 0 4px;font-family:'Barlow',sans-serif;font-size:11px;color:#94a3b8;letter-spacing:.04em;">
+    Suporte: Ezequiel Miranda
+  </div>
+
   </div><!-- /captureArea -->
 </div>
 
 <!-- ═══ TAB 2 — PÓS SORTING ═════════════════════════════════════════ -->
 <div class="tab-panel" id="tab2">
+<div id="ps2FullPanel">
   <div class="panel-header">
     <div class="panel-title" style="text-align:center;width:100%">📋 Pós Sorting — Faltantes SPA1</div>
   </div>
 
-  <div style="max-width:1400px;margin:0 auto;">
+  <div style="max-width:1400px;margin:0 auto;padding-bottom:4px;">
 
     <!-- KPI CARDS -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;">
@@ -680,6 +685,11 @@
     </div>
 
   </div><!-- /max-width -->
+
+  <div style="text-align:center;padding:10px 0 6px;font-family:'Barlow',sans-serif;font-size:11px;color:#94a3b8;letter-spacing:.04em;">
+    Suporte: Ezequiel Miranda
+  </div>
+</div><!-- /ps2FullPanel -->
 </div>
 
 <!-- ═══ TAB 3 ════════════════════════════════════════════════════════ -->
@@ -700,6 +710,7 @@
         <div class="footer-info"><span id="p3Footer"></span></div>
       </div>
     </div>
+    <div style="text-align:center;padding:10px 0 4px;font-family:'Barlow',sans-serif;font-size:11px;color:#94a3b8;letter-spacing:.04em;">Suporte: Ezequiel Miranda</div>
   </div>
 </div>
 
@@ -721,6 +732,7 @@
         <div class="footer-info"><span id="p4Footer"></span></div>
       </div>
     </div>
+    <div style="text-align:center;padding:10px 0 4px;font-family:'Barlow',sans-serif;font-size:11px;color:#94a3b8;letter-spacing:.04em;">Suporte: Ezequiel Miranda</div>
   </div>
 </div>
 
@@ -1147,10 +1159,9 @@ $("printBtn2").addEventListener("click", async () => {
   btn.textContent = "⏳ Gerando…";
   btn.disabled = true;
   try {
-    const target = document.querySelector("#tab2 > div") || $("tab2");
+    const target = $("ps2FullPanel");
     const canvas = await html2canvas(target, {
-      scale: 2, backgroundColor: "#eef3fb", useCORS: true, logging: false,
-      ignoreElements: el => el.id === "tab2Actions" || el.tagName === "NAV"
+      scale: 2, backgroundColor: "#eef3fb", useCORS: true, logging: false
     });
     const link = document.createElement("a");
     link.download = `pos-sorting-spa1-${new Date().toISOString().slice(0,10)}.png`;
