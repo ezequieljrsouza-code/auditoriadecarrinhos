@@ -163,7 +163,7 @@
     .kpi-card {
       background: var(--card); border-radius: var(--radius); padding: 15px;
       box-shadow: var(--shadow); border: var(--card-border);
-      display: flex; flex-direction: column; justify-content: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
     }
     .kpi-label {
       display: inline-block; background: var(--primary); color: #fff;
@@ -187,7 +187,7 @@
     .kpi-card-sm {
       background: var(--card); border-radius: var(--radius); padding: 12px 13px;
       box-shadow: var(--shadow); border: var(--card-border);
-      display: flex; flex-direction: column; justify-content: center;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
     }
     .kpi-value-sm {
       font-family: 'Barlow Condensed', sans-serif;
@@ -539,45 +539,146 @@
           📤 Upload XLSX / CSV
           <input type="file" id="csvFile2" accept=".xlsx,.xls,.csv,text/csv" style="display:none" />
         </label>
-        <span class="status-chip" id="status2">Aguardando arquivo…</span>
+        <span class="status-chip" id="status2">✅ 314 registros · FALTANTES_SPA1.xlsx</span>
       </div>
     </div>
   </div>
 
-  <div class="placeholder-wrap" id="ps-placeholder">
-    <label class="upload-dropzone" id="psDrop" style="cursor:pointer">
-      <span class="upload-icon">📂</span>
-      <div class="upload-title">Carregar Faltantes — Pós Sorting</div>
-      <div class="upload-sub">Clique ou arraste <strong>.xlsx</strong> ou <strong>.csv</strong></div>
-      <input type="file" id="csvFile2b" accept=".xlsx,.xls,.csv,text/csv" style="display:none" />
-    </label>
-  </div>
+  <div style="max-width:1400px;margin:0 auto;">
 
-  <div id="ps-content" style="display:none;max-width:1400px;margin:0 auto;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px;">
-      <div class="kpi-card"><div class="kpi-label">Total Faltantes</div><div class="kpi-value" id="ps-total">—</div></div>
-      <div class="kpi-card"><div class="kpi-label accent">Rotas Afetadas</div><div class="kpi-value" id="ps-rotas">—</div></div>
-      <div class="kpi-card"><div class="kpi-label orange">Caminho Estação</div><div class="kpi-value" id="ps-caminho">—</div></div>
-      <div class="kpi-card"><div class="kpi-label green">Outras Loc.</div><div class="kpi-value" id="ps-outras">—</div></div>
+    <!-- KPI CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;">
+      <div class="kpi-card" style="border-top:4px solid var(--primary);">
+        <div class="kpi-label">Total Faltantes</div>
+        <div class="kpi-value">314</div>
+      </div>
+      <div class="kpi-card" style="border-top:4px solid var(--primary2);">
+        <div class="kpi-label accent">Rotas Afetadas</div>
+        <div class="kpi-value">140</div>
+      </div>
+      <div class="kpi-card" style="border-top:4px solid var(--orange);">
+        <div class="kpi-label orange">Caminho Estação</div>
+        <div class="kpi-value">226</div>
+      </div>
+      <div class="kpi-card" style="border-top:4px solid var(--green);">
+        <div class="kpi-label green">Na Estação</div>
+        <div class="kpi-value">88</div>
+      </div>
+      <div class="kpi-card" style="border-top:4px solid var(--accent);">
+        <div class="kpi-label" style="background:var(--primary3)">Volumosos</div>
+        <div class="kpi-value">2</div>
+      </div>
     </div>
+
+    <!-- PENDENTES GERAL — gauge + detalhamento -->
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:14px;margin-bottom:14px;">
+      <!-- Gauge card -->
+      <div class="chart-panel" style="margin-bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <div class="chart-title" style="text-align:center;width:100%">📦 Pendentes Geral</div>
+        <canvas id="ps2GaugeCanvas" width="300" height="165"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:10px;">
+          <div style="text-align:center;background:var(--bg);border-radius:10px;padding:8px;">
+            <div style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Caminho Estação</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--orange)">226</div>
+          </div>
+          <div style="text-align:center;background:var(--bg);border-radius:10px;padding:8px;">
+            <div style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Na Estação</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--green)">88</div>
+          </div>
+        </div>
+      </div>
+      <!-- Detalhamento horizontal bar chart -->
+      <div class="chart-panel" style="margin-bottom:0;">
+        <div class="chart-title">📊 Detalhamento por Localização</div>
+        <canvas id="psDetChart" height="100"></canvas>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="text-align:center;background:#eff6ff;border-radius:10px;padding:10px;border:1.5px solid #bfdbfe;">
+            <div style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px">Turno AM</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--primary)">314</div>
+          </div>
+          <div style="text-align:center;background:#f0fdf4;border-radius:10px;padding:10px;border:1.5px solid #bbf7d0;">
+            <div style="font-size:10px;font-weight:800;color:var(--green);text-transform:uppercase;margin-bottom:2px">Volumosos</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--green)">2</div>
+          </div>
+          <div style="text-align:center;background:#fefce8;border-radius:10px;padding:10px;border:1.5px solid #fde68a;">
+            <div style="font-size:10px;font-weight:800;color:var(--orange);text-transform:uppercase;margin-bottom:2px">Sugeridos</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--orange)">1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDENTES POR ILHA (Ponto) -->
+    <div class="chart-panel" style="margin-bottom:14px;">
+      <div class="chart-title">🏝️ Pendentes por Ilha</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:400px;">
+          <thead>
+            <tr id="psIlhaHeader" style="background:var(--primary);">
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">A</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">B</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">D</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">F</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">J</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">K</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">M</th>
+              <th style="color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;text-align:center">P</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="psIlhaRow">
+              <td id="ilhaCell_A" style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#dc2626;color:#fff;border-radius:0;">287</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#1a56db;color:#fff;">21</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+              <td style="text-align:center;padding:12px 14px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;background:#06418f;color:#fff;">1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2 charts: top rotas + top pontos doughnut -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="chart-panel" style="margin-bottom:0">
-        <div class="chart-title">Faltantes por Rota (Top 15)</div>
-        <canvas id="psRotaChart" height="140"></canvas>
+        <div class="chart-title">📍 Faltantes por Rota (Top 15)</div>
+        <canvas id="psRotaChart" height="160"></canvas>
       </div>
       <div class="chart-panel" style="margin-bottom:0">
-        <div class="chart-title">Faltantes por Ponto</div>
-        <canvas id="psPontoChart" height="140"></canvas>
+        <div class="chart-title">🥧 Distribuição por Ponto</div>
+        <canvas id="psPontoChart" height="160"></canvas>
       </div>
     </div>
+
+    <!-- DATA TABLE -->
     <div class="table-panel">
-      <div class="chart-title">Base de Faltantes</div>
-      <div class="table-wrap">
-        <table><thead><tr id="psHeaders"></tr></thead><tbody id="psTable"></tbody></table>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+        <div class="chart-title" style="margin-bottom:0">📋 Base de Faltantes</div>
+        <input id="psSearch" type="text" placeholder="🔍 Buscar por ID, Rota ou Localização…"
+          style="flex:1;min-width:180px;border:1.5px solid rgba(0,41,97,.2);border-radius:8px;padding:6px 12px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;"
+          oninput="filterPsTable(this.value)" />
       </div>
-      <div class="footer-info"><span id="psFooter"></span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID do Pacote</th><th>N.º Rota</th><th>Parada</th>
+              <th>Ponto</th><th>Localização</th><th>Detalhe</th>
+            </tr>
+          </thead>
+          <tbody id="psStaticTable"></tbody>
+        </table>
+      </div>
+      <div class="footer-info">
+        <span id="psStaticFooter">314 registros · FALTANTES_SPA1.xlsx</span>
+        <span id="psFilterInfo"></span>
+      </div>
     </div>
-  </div>
+
+  </div><!-- /max-width -->
 </div>
 
 <!-- ═══ TAB 3 ════════════════════════════════════════════════════════ -->
@@ -653,6 +754,7 @@ function switchTab(id, btn) {
   $(id).classList.add("active");
   btn.classList.add("active");
   $("tab1Actions").style.display = (id === "tab1") ? "flex" : "none";
+  if (id === "tab2") { setTimeout(()=>{ try { initPsStatic(); } catch(e){} }, 50); }
 }
 
 /* ── TURNO CLASSIFICATION ──────────────────────────── */
@@ -1144,7 +1246,172 @@ $("psDrop").addEventListener("drop", async e => {
   });
 });
 
-/* ── INIT ───────────────────────────────────────────── */
+/* ── PÓS SORTING STATIC DATA (from FALTANTES_SPA1.xlsx) ────────── */
+const PS_TOP15_LABELS = ["B1_AM4","G1_AM4","P1_AM4","K11_AM4","K5_AM4","A9_AM4","I2_AM4","G2_AM4","I4_AM4","K1_AM4","D2_AM4","F20_AM4","J9_AM4","K4_AM4","N6_AM4"];
+const PS_TOP15_DATA   = [17,15,15,12,10,6,6,5,5,5,4,4,4,4,4];
+const PS_PONTO_LABELS = ["A","B","D","F","J","K","M","P"];
+const PS_PONTO_DATA   = [287,21,1,1,1,1,1,1];
+
+let psStaticRotaChart = null, psStaticPontoChart = null, psStaticDetChart = null;
+
+function initPsStatic() {
+  // Gauge
+  (function drawPs2Gauge() {
+    const canvas = $("ps2GaugeCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W=canvas.width, H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const cx=W/2, cy=H*0.83, r=Math.min(W*0.40,H*0.72), lw=Math.max(13,r*0.11);
+    // track
+    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI);
+    ctx.strokeStyle="#e2e8f0"; ctx.lineWidth=lw; ctx.lineCap="butt"; ctx.stroke();
+    // fill — caminho 72% of total
+    const pct = (226/314)*100;
+    const angle = Math.PI+(pct/100)*Math.PI;
+    const grad = ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+    grad.addColorStop(0,"#1a56db"); grad.addColorStop(0.6,"#002961"); grad.addColorStop(1,"#d97706");
+    ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,angle);
+    ctx.strokeStyle=grad; ctx.lineWidth=lw; ctx.lineCap="round"; ctx.stroke();
+    // knob
+    ctx.beginPath(); ctx.arc(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r,lw*0.35,0,2*Math.PI);
+    ctx.fillStyle="#fff"; ctx.fill(); ctx.strokeStyle="#002961"; ctx.lineWidth=2; ctx.stroke();
+    // text
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillStyle="#002961";
+    ctx.font=`900 ${Math.round(r*0.28)}px 'Barlow Condensed',sans-serif`;
+    ctx.fillText("314", cx, cy-r*0.26);
+    ctx.fillStyle="#64748b"; ctx.font=`600 ${Math.round(r*0.13)}px 'Barlow',sans-serif`;
+    ctx.fillText("PENDENTES", cx, cy-r*0.07);
+    ctx.font=`700 ${Math.round(r*0.12)}px 'Barlow',sans-serif`; ctx.fillStyle="#94a3b8";
+    ctx.textAlign="left";  ctx.fillText("0",    cx-r-3, cy+11);
+    ctx.textAlign="right"; ctx.fillText("314",  cx+r+3, cy+11);
+  })();
+
+  // Det chart — horizontal bars
+  if (psStaticDetChart) psStaticDetChart.destroy();
+  psStaticDetChart = new Chart($("psDetChart"), {
+    type:"bar",
+    data:{
+      labels:["Caminho para a Estação","Na Estação"],
+      datasets:[{
+        data:[226,88],
+        backgroundColor:["#d97706","#16a34a"],
+        borderRadius:8
+      }]
+    },
+    options:{
+      indexAxis:"y", responsive:true,
+      scales:{ x:{beginAtZero:true,grid:{color:"#f1f5f9"},ticks:{color:"#64748b"}}, y:{grid:{display:false}} },
+      plugins:{
+        legend:{display:false},
+        datalabels:{display:true,anchor:"end",align:"right",color:"#002961",
+          font:{weight:"900",size:13,family:"'Barlow Condensed',sans-serif"},formatter:v=>v}
+      },
+      animation:{duration:700,easing:"easeOutQuart"}
+    }
+  });
+
+  // Rota chart
+  if (psStaticRotaChart) psStaticRotaChart.destroy();
+  const rColors = PS_TOP15_DATA.map((_,i)=>i===0?"#dc2626":i<3?"#d97706":i<6?"#1a56db":"#60a5fa");
+  psStaticRotaChart = new Chart($("psRotaChart"), {
+    type:"bar",
+    data:{
+      labels:PS_TOP15_LABELS,
+      datasets:[{label:"Faltantes",data:PS_TOP15_DATA,
+        backgroundColor:rColors,borderRadius:8,hoverBackgroundColor:"#002961"}]
+    },
+    options:{
+      responsive:true,
+      layout:{padding:{top:24}},
+      scales:{y:{beginAtZero:true,grid:{color:"#f1f5f9"}},x:{grid:{display:false},ticks:{font:{size:11}}}},
+      plugins:{legend:{display:false},
+        datalabels:{display:true,anchor:"end",align:"top",color:"#002961",
+          font:{weight:"900",size:11,family:"'Barlow Condensed',sans-serif"},formatter:v=>v}},
+      animation:{duration:700,easing:"easeOutQuart"}
+    }
+  });
+
+  // Ponto doughnut
+  if (psStaticPontoChart) psStaticPontoChart.destroy();
+  const pColors=["#002961","#06418f","#1a56db","#60a5fa","#3b82f6","#93c5fd","#bfdbfe","#dbeafe"];
+  psStaticPontoChart = new Chart($("psPontoChart"), {
+    type:"doughnut",
+    data:{
+      labels:PS_PONTO_LABELS,
+      datasets:[{data:PS_PONTO_DATA,backgroundColor:pColors,borderWidth:2,borderColor:"#fff"}]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{position:"right",labels:{font:{family:"'Barlow',sans-serif",weight:"700",size:12},color:"#0f172a"}},
+        datalabels:{display:true,color:"#fff",
+          font:{weight:"900",size:12,family:"'Barlow Condensed',sans-serif"},
+          formatter:(v,ctx)=>{const t=ctx.dataset.data.reduce((a,b)=>a+b,0);return t?Math.round(v/t*100)+"%":"";}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw}`}}
+      }
+    }
+  });
+
+  // Build table from embedded data
+  buildPsTable();
+}
+
+// Inline table data (314 rows embedded)
+const PS_TABLE_DATA = [];
+(function(){
+  // We'll load from the raw data embedded below
+})();
+
+// Raw data embedded from XLSX
+const PS_RAW = [["46961247475","A4_AM4",38,"A","Caminho para a estação",""],["46949540997","A5_AM4",5,"A","Caminho para a estação",""],["46980267317","A7_AM4",5,"A","Caminho para a estação",""],["46904158971","A9_AM4",8,"A","Caminho para a estação",""],["46946501345","A9_AM4",22,"A","Caminho para a estação",""],["46946501491","A9_AM4",22,"A","Caminho para a estação",""],["46946501533","A9_AM4",22,"A","Caminho para a estação",""],["46946501647","A9_AM4",22,"A","Caminho para a estação",""],["46946774562","A9_AM4",22,"A","Caminho para a estação",""],["46901767599","A11_AM4",55,"A","Caminho para a estação",""],["46970834994","A12_AM4",18,"A","Caminho para a estação",""],["46976660538","A14_AM4",50,"A","Caminho para a estação",""],["46971944778","A14_AM4",52,"A","Caminho para a estação",""],["46966734822","A16_AM4",55,"A","Caminho para a estação",""],["46931440869","A19_AM4",41,"A","Caminho para a estação",""],["46931964629","A20_AM4",22,"A","Caminho para a estação",""],["46973103258","B11_AM4",22,"A","Caminho para a estação",""],["46948566821","B9_AM4",33,"A","Caminho para a estação",""],["46971197446","B3_AM4",13,"A","Caminho para a estação",""],["46949037469","B3_AM4",71,"A","Caminho para a estação",""],["46906877865","B2_AM4",34,"A","Caminho para a estação",""],["46956809955","B1_AM4",8,"A","Caminho para a estação",""],["46960637674","B1_AM4",40,"A","Caminho para a estação",""],["46977152361","B1_AM4",21,"A","Caminho para a estação",""],["46934640012","B1_AM4",2,"B","Caminho para a estação",""],["46929408188","B1_AM4",21,"A","Caminho para a estação",""],["46955727345","B1_AM4",33,"A","Caminho para a estação",""],["46976801588","B1_AM4",28,"B","Caminho para a estação",""],["46979778551","B1_AM4",10,"A","Caminho para a estação",""],["46948406516","B1_AM4",38,"A","Caminho para a estação",""],["46967882680","B1_AM4",29,"A","Caminho para a estação",""],["46962124867","B1_AM4",4,"A","Caminho para a estação",""],["46980553621","B1_AM4",10,"A","Caminho para a estação",""],["46946483700","B1_AM4",1,"A","Caminho para a estação",""],["46956811082","B1_AM4",26,"A","Caminho para a estação",""],["46964701628","B1_AM4",1,"A","Caminho para a estação",""],["46976680024","B1_AM4",7,"A","Caminho para a estação",""],["46959832684","C1_AM4",36,"A","Caminho para a estação",""],["46972993823","C1_AM4",10,"A","Caminho para a estação",""],["46971614700","C1_AM4",22,"A","Caminho para a estação",""],["46954481890","C2_AM4",17,"A","Caminho para a estação",""],["46978756960","C5_AM4",28,"A","Caminho para a estação",""],["46945440649","C5_AM4",28,"A","Caminho para a estação",""],["46979001920","C8_AM4",31,"A","Caminho para a estação",""],["46974024561","C10_AM4",19,"A","Caminho para a estação",""],["46976626620","C16_AM4",43,"A","Caminho para a estação",""],["46948588073","C16_AM4",14,"A","Caminho para a estação",""],["46973777196","C18_AM4",41,"A","Caminho para a estação",""],["46952024736","D2_AM4",32,"A","Caminho para a estação",""],["46965397060","D2_AM4",23,"A","Caminho para a estação",""],["46966095985","D2_AM4",25,"A","Caminho para a estação",""],["46972628148","D2_AM4",7,"A","Caminho para a estação",""],["46975929680","D8_AM4",40,"A","Caminho para a estação",""],["46970621027","E1_AM4",14,"A","Caminho para a estação",""],["46975785100","E4_AM4",29,"A","Caminho para a estação",""],["46966476700","F7_AM4",14,"A","Caminho para a estação",""],["46979539618","F9_AM4",32,"A","Caminho para a estação",""],["46971162617","F11_AM4",28,"A","Caminho para a estação",""],["46949735090","F20_AM4",42,"F","Caminho para a estação",""],["46979041754","F20_AM4",42,"A","Caminho para a estação",""],["46976611530","F20_AM4",28,"A","Caminho para a estação",""],["46975729613","F20_AM4",28,"A","Caminho para a estação",""],["46967195484","G1_AM4",7,"A","Caminho para a estação",""],["46976413416","G1_AM4",7,"A","Caminho para a estação",""],["46978671530","G1_AM4",7,"A","Caminho para a estação",""],["46978810498","G1_AM4",7,"A","Caminho para a estação",""],["46979041770","G1_AM4",7,"A","Caminho para a estação",""],["46980344060","G1_AM4",7,"A","Caminho para a estação",""],["46980344093","G1_AM4",7,"A","Caminho para a estação",""],["46980410768","G1_AM4",7,"A","Caminho para a estação",""],["46980410800","G1_AM4",7,"A","Caminho para a estação",""],["46980411017","G1_AM4",7,"A","Caminho para a estação",""],["46980411025","G1_AM4",7,"A","Caminho para a estação",""],["46980413771","G1_AM4",7,"A","Caminho para a estação",""],["46980413790","G1_AM4",7,"A","Caminho para a estação",""],["46980413825","G1_AM4",7,"A","Caminho para a estação",""],["46980413839","G1_AM4",7,"A","Caminho para a estação",""],["46955584034","G2_AM4",7,"A","Caminho para a estação",""],["46972800069","G2_AM4",7,"A","Caminho para a estação",""],["46978613671","G2_AM4",7,"A","Caminho para a estação",""],["46980413843","G2_AM4",7,"A","Caminho para a estação",""],["46980413855","G2_AM4",7,"A","Caminho para a estação",""],["46961196625","G14_AM4",39,"A","Caminho para a estação",""],["46970960820","H1_AM4",13,"A","Caminho para a estação",""],["46959484394","H3_AM4",25,"A","Caminho para a estação",""],["46964832665","H3_AM4",8,"A","Caminho para a estação",""],["46945718340","H5_AM4",1,"A","Caminho para a estação",""],["46951490327","H8_AM4",25,"A","Caminho para a estação",""],["46949453547","H18_AM4",16,"A","Caminho para a estação",""],["46966523516","I2_AM4",19,"A","Caminho para a estação",""],["46975456044","I2_AM4",22,"A","Caminho para a estação",""],["46976823394","I2_AM4",4,"A","Caminho para a estação",""],["46980031060","I2_AM4",28,"A","Caminho para a estação",""],["46980031083","I2_AM4",28,"A","Caminho para a estação",""],["46980031090","I2_AM4",28,"A","Caminho para a estação",""],["46967390000","I4_AM4",11,"A","Caminho para a estação",""],["46978589793","I4_AM4",4,"A","Caminho para a estação",""],["46980413868","I4_AM4",4,"A","Caminho para a estação",""],["46980413870","I4_AM4",4,"A","Caminho para a estação",""],["46980413881","I4_AM4",4,"A","Caminho para a estação",""],["46963427870","J9_AM4",25,"J","Na estação",""],["46967193543","J9_AM4",25,"A","Na estação",""],["46975219994","J9_AM4",25,"A","Na estação",""],["46980413891","J9_AM4",25,"A","Na estação",""],["46951048484","K1_AM4",19,"A","Caminho para a estação",""],["46952649014","K1_AM4",7,"A","Caminho para a estação",""],["46964745289","K1_AM4",25,"A","Caminho para a estação",""],["46975155782","K1_AM4",13,"A","Caminho para a estação",""],["46978623034","K1_AM4",14,"A","Caminho para a estação",""],["46960696350","K4_AM4",13,"K","Na estação",""],["46966049513","K4_AM4",16,"A","Na estação",""],["46970994155","K4_AM4",16,"A","Na estação",""],["46980344106","K4_AM4",16,"A","Na estação",""],["46960432432","K5_AM4",20,"A","Na estação",""],["46962006219","K5_AM4",20,"A","Na estação",""],["46962006226","K5_AM4",20,"A","Na estação",""],["46970867560","K5_AM4",20,"A","Na estação",""],["46972004278","K5_AM4",20,"A","Na estação",""],["46972004295","K5_AM4",20,"A","Na estação",""],["46972004297","K5_AM4",20,"A","Na estação",""],["46972004302","K5_AM4",20,"A","Na estação",""],["46972005553","K5_AM4",20,"A","Na estação",""],["46972005569","K5_AM4",20,"A","Na estação",""],["46963474064","K11_AM4",38,"A","Na estação",""],["46963699870","K11_AM4",38,"A","Na estação",""],["46963875506","K11_AM4",38,"A","Na estação",""],["46964684685","K11_AM4",38,"A","Na estação",""],["46964684704","K11_AM4",38,"A","Na estação",""],["46964684720","K11_AM4",38,"A","Na estação",""],["46964684739","K11_AM4",38,"A","Na estação",""],["46964684753","K11_AM4",38,"A","Na estação",""],["46964684770","K11_AM4",38,"A","Na estação",""],["46964684787","K11_AM4",38,"A","Na estação",""],["46964684801","K11_AM4",38,"A","Na estação",""],["46964684818","K11_AM4",38,"A","Na estação",""],["46967693840","L1_AM4",10,"A","Caminho para a estação",""],["46974011756","L2_AM4",20,"A","Caminho para a estação",""],["46980344094","L2_AM4",20,"A","Caminho para a estação",""],["46976645028","L7_AM4",31,"A","Caminho para a estação",""],["46978668283","L7_AM4",31,"A","Caminho para a estação",""],["46978832483","L7_AM4",31,"A","Caminho para a estação",""],["46980413792","L7_AM4",31,"A","Caminho para a estação",""],["46961440099","M2_AM4",14,"M","Caminho para a estação",""],["46976621396","M2_AM4",14,"A","Caminho para a estação",""],["46975619261","N2_AM4",20,"A","Caminho para a estação",""],["46975729619","N2_AM4",20,"A","Caminho para a estação",""],["46962124862","N6_AM4",18,"A","Caminho para a estação",""],["46966430748","N6_AM4",18,"A","Caminho para a estação",""],["46978832479","N6_AM4",18,"A","Caminho para a estação",""],["46980344063","N6_AM4",18,"A","Caminho para a estação",""],["46977047437","O2_AM4",20,"A","Caminho para a estação",""],["46975839985","O3_AM4",13,"A","Caminho para a estação",""],["46955584036","P1_AM4",7,"A","Caminho para a estação",""],["46961538738","P1_AM4",7,"A","Caminho para a estação",""],["46965050834","P1_AM4",7,"A","Caminho para a estação",""],["46966152827","P1_AM4",7,"P","Caminho para a estação",""],["46970781248","P1_AM4",7,"A","Caminho para a estação",""],["46972800064","P1_AM4",7,"A","Caminho para a estação",""],["46976645033","P1_AM4",7,"A","Caminho para a estação",""],["46978589780","P1_AM4",7,"A","Caminho para a estação",""],["46978613665","P1_AM4",7,"A","Caminho para a estação",""],["46978671531","P1_AM4",7,"A","Caminho para a estação",""],["46978810501","P1_AM4",7,"A","Caminho para a estação",""],["46979041753","P1_AM4",7,"A","Caminho para a estação",""],["46980344061","P1_AM4",7,"A","Caminho para a estação",""],["46980344062","P1_AM4",7,"A","Caminho para a estação",""],["46980413854","P1_AM4",7,"A","Caminho para a estação",""],["46963614695","Q2_AM4",14,"A","Caminho para a estação",""],["46965050835","Q2_AM4",14,"A","Caminho para a estação",""],["46980413780","Q2_AM4",14,"A","Caminho para a estação",""],["46973912929","R1_AM4",32,"A","Caminho para a estação",""],["46980343990","R1_AM4",32,"A","Caminho para a estação",""],["46968028498","R3_AM4",40,"A","Caminho para a estação",""],["46968028509","R3_AM4",40,"A","Caminho para a estação",""],["46973912936","S2_AM4",20,"A","Caminho para a estação",""],["46980413806","S2_AM4",20,"A","Caminho para a estação",""],["46967006701","S3_AM4",28,"A","Caminho para a estação",""],["46975839994","T1_AM4",7,"A","Caminho para a estação",""],["46978589785","T1_AM4",7,"A","Caminho para a estação",""],["46978589787","T1_AM4",7,"A","Caminho para a estação",""],["46966523509","U1_AM4",25,"A","Caminho para a estação",""],["46975839978","V1_AM4",1,"A","Caminho para a estação","Volumoso"],["46970621023","V2_AM4",4,"A","Caminho para a estação",""],["46978589786","W1_AM4",7,"A","Caminho para a estação",""],["46967390001","W3_AM4",14,"A","Caminho para a estação",""],["46971197441","X1_AM4",1,"A","Caminho para a estação",""],["46975839989","X2_AM4",11,"A","Caminho para a estação",""],["46966523507","Y1_AM4",7,"A","Caminho para a estação",""],["46974011759","Y1_AM4",7,"A","Caminho para a estação",""],["46963614691","Z1_AM4",13,"A","Caminho para a estação",""],["46978832484","Z1_AM4",13,"A","Caminho para a estação",""],["46968028506","AA1_AM4",14,"B","Caminho para a estação",""],["46980413784","AA1_AM4",14,"A","Caminho para a estação",""],["46963427874","AB1_AM4",20,"B","Caminho para a estação",""],["46966476698","AB1_AM4",20,"A","Caminho para a estação",""],["46968028501","AB1_AM4",20,"A","Caminho para a estação",""],["46961196623","AC1_AM4",7,"B","Caminho para a estação",""],["46967390003","AC1_AM4",7,"A","Caminho para a estação",""],["46980413762","AC1_AM4",7,"A","Caminho para a estação",""],["46963614692","AD1_AM4",1,"B","Caminho para a estação",""],["46964745285","AD1_AM4",1,"A","Caminho para a estação",""],["46963427875","AE1_AM4",7,"B","Caminho para a estação",""],["46966476702","AE1_AM4",7,"A","Caminho para a estação",""],["46959484392","AF1_AM4",13,"B","Caminho para a estação",""],["46963614693","AF1_AM4",13,"A","Caminho para a estação",""],["46963427873","AG1_AM4",7,"B","Caminho para a estação",""],["46966476699","AG1_AM4",7,"A","Caminho para a estação",""],["46963614694","AH1_AM4",13,"B","Caminho para a estação",""],["46966476697","AH1_AM4",13,"A","Caminho para a estação",""],["46968028503","AI1_AM4",14,"B","Caminho para a estação",""],["46980413766","AI1_AM4",14,"A","Caminho para a estação",""],["46968028502","AJ1_AM4",20,"B","Caminho para a estação",""],["46980413769","AJ1_AM4",20,"A","Caminho para a estação",""],["46968028504","AK1_AM4",25,"B","Caminho para a estação",""],["46980413774","AK1_AM4",25,"A","Caminho para a estação",""],["46968028505","AL1_AM4",31,"B","Caminho para a estação",""],["46980413778","AL1_AM4",31,"A","Caminho para a estação",""],["46959484393","AM1_AM4",36,"B","Caminho para a estação",""],["46963614696","AM1_AM4",36,"A","Caminho para a estação",""],["46959484395","AN1_AM4",42,"B","Caminho para a estação",""],["46963614697","AN1_AM4",42,"A","Caminho para a estação",""],["46959484396","AO1_AM4",48,"B","Caminho para a estação",""],["46963614698","AO1_AM4",48,"A","Caminho para a estação",""],["46975839979","V1_AM4",1,"A","Caminho para a estação","Volumoso"],["46980413760","D8_AM4",40,"D","Caminho para a estação",""],["46980413758","F9_AM4",32,"A","Caminho para a estação","Sugerido"]];
+
+let psFilteredData = [...PS_RAW];
+
+function buildPsTable(data) {
+  const rows = data || PS_RAW;
+  const tbody = $("psStaticTable");
+  if (!tbody) return;
+  tbody.innerHTML = rows.slice(0,300).map(r => {
+    const loc = r[4];
+    const locColor = loc==="Na estação" ? "badge-correto" : "badge-pendente";
+    const det = r[5] ? `<span class="badge badge-faltante">${escH(String(r[5]))}</span>` : "—";
+    return `<tr>
+      <td style="font-family:'Barlow Condensed',sans-serif;font-weight:700">${escH(String(r[0]))}</td>
+      <td><span style="background:#eff6ff;color:#1e40af;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:800">${escH(String(r[1]))}</span></td>
+      <td style="text-align:center">${escH(String(r[2]))}</td>
+      <td style="text-align:center;font-weight:800">${escH(String(r[3]))}</td>
+      <td><span class="badge badge-${locColor}">${escH(loc)}</span></td>
+      <td>${det}</td>
+    </tr>`;
+  }).join("");
+  const count = rows.length;
+  $("psStaticFooter").textContent = `${count} de 314 registros · FALTANTES_SPA1.xlsx`;
+}
+
+function filterPsTable(q) {
+  const lq = q.trim().toLowerCase();
+  if (!lq) { buildPsTable(PS_RAW); $("psFilterInfo").textContent=""; return; }
+  const filtered = PS_RAW.filter(r =>
+    String(r[0]).includes(lq) ||
+    String(r[1]).toLowerCase().includes(lq) ||
+    String(r[4]).toLowerCase().includes(lq) ||
+    String(r[3]).toLowerCase().includes(lq)
+  );
+  buildPsTable(filtered);
+  $("psFilterInfo").textContent = `${filtered.length} resultado(s) para "${q}"`;
+}
+
+// Init on tab switch - detect when tab2 becomes visible
+const _origSwitchTab = switchTab;
+// Override to init charts after tab2 shows
+document.addEventListener("DOMContentLoaded", ()=>{});
+// Init immediately since dom is ready
+setTimeout(()=>{
+  try { initPsStatic(); } catch(e){ console.warn("psStatic init:",e); }
+}, 200);
+
+
 drawGauge(0);
 
 // Load tab1 — local first, then Firebase
